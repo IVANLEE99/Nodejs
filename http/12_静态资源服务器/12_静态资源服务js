@@ -1,0 +1,103 @@
+/**
+ * 搭建http服务，响应一个4行3列的表哥，并要求表格有隔行换色效果
+ * 且点击单元格能高亮显示
+ */
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const mimeTypes = {
+  "3gp": "video/3gpp",
+  aac: "audio/x-aac",
+  aiff: "audio/aiff",
+  avi: "video/x-msvideo",
+  bmp: "image/bmp",
+  csv: "text/csv",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  flash: "application/x-shockwave-flash",
+  gif: "image/gif",
+  gz: "application/x-gzip",
+  html: "text/html",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  js: "application/javascript",
+  json: "application/json",
+  mp3: "audio/mpeg",
+  mp4: "video/mp4",
+  mpeg: "video/mpeg",
+  mpg: "video/mpeg",
+  ogg: "audio/ogg",
+  pdf: "application/pdf",
+  png: "image/png",
+  ppt: "application/vnd.ms-powerpoint",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  rar: "application/x-rar-compressed",
+  rtf: "application/rtf",
+  svg: "image/svg+xml",
+  swf: "application/x-shockwave-flash",
+  tar: "application/x-tar",
+  tif: "image/tiff",
+  tiff: "image/tiff",
+  txt: "text/plain",
+  wav: "audio/x-wav",
+  webm: "video/webm",
+  webp: "image/webp",
+  woff: "application/font-woff",
+  woff2: "application/font-woff2",
+  xml: "text/xml",
+  zip: "application/zip",
+  css: "text/css",
+  // 还可以继续添加其他MIME类型
+};
+
+// 使用示例
+function getMIMETypeFromExtension(fileExtension) {
+  return mimeTypes[fileExtension.toLowerCase()] || "application/octet-stream";
+}
+
+const fileExtension = ".png";
+const mimeType = getMIMETypeFromExtension(fileExtension);
+console.log(mimeType); // 输出: image/png
+
+const server = http.createServer((req, res) => {
+  let { method, url } = req;
+  let { pathname } = new URL(url, "http://127.0.0.1");
+  let filePath = __dirname + "/page" + pathname;
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.statusCode = 500;
+      res.setHeader("content-type", "text/html;charset=utf8");
+      res.end("文件不存在");
+      return;
+    }
+    let ext = path.extname(filePath).slice(1);
+    if (mimeTypes[ext]) {
+      if (ext === "html") {
+        res.setHeader("content-type", mimeTypes[ext] + ";charset=utf8");
+      } else {
+        res.setHeader("content-type", mimeTypes[ext]);
+      }
+    } else {
+      res.setHeader("content-type", "application/octet-stream");
+    }
+
+    res.end(data);
+  });
+  // if (pathname === "/") {
+  //   //设置响应头
+  //   res.setHeader("content-type", "text/html;charset=utf8");
+  //   let file = fs.readFileSync(__dirname + "/index.html");
+  //   res.end(file);
+  // } else if (pathname === "/index.css") {
+  //   let file = fs.readFileSync(__dirname + "/index.css");
+  //   res.end(file);
+  // } else if (pathname === "/index.js") {
+  //   let file = fs.readFileSync(__dirname + "/index.js");
+  //   res.end(file);
+  // } else {
+  //   res.end("<h1>not found</h1>");
+  // }
+});
+server.listen(9000, () => {
+  console.log("server listen 9000 ...");
+});
