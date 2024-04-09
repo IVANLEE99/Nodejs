@@ -65,9 +65,28 @@ const server = http.createServer((req, res) => {
   let filePath = __dirname + "/page" + pathname;
   fs.readFile(filePath, (err, data) => {
     if (err) {
-      res.statusCode = 500;
+      console.error(err);
       res.setHeader("content-type", "text/html;charset=utf8");
-      res.end("文件不存在");
+
+      switch (err.code) {
+        case "ENOENT":
+          res.statusCode = 404;
+          res.end("404 not found!");
+          break;
+        case "EPERM":
+          res.statusCode = 4043;
+          res.end("403 forbidden!");
+          break;
+        case "EACCES":
+          res.statusCode = 4043;
+          res.end("403 forbidden!");
+          break;
+
+        default:
+          res.statusCode = 500;
+          res.end("文件不存在");
+          break;
+      }
       return;
     }
     let ext = path.extname(filePath).slice(1);
