@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "uniq": "^1.0.1"
+  },
+  "devDependencies": {
+    "less": "^4.2.0"
   }
 }
