@@ -1,0 +1,17 @@
+/*这是注释*/
+table {
+    border-collapse: collapse;
+}
+
+td {
+    border: 1px solid red;
+    padding: 10px;
+}
+
+tr:nth-child(2n) {
+    background-color: rgb(133, 56, 240);
+}
+
+tr:nth-child(2n + 1) {
+    background-color: rgb(34, 205, 100);
+}
