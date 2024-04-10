@@ -1,0 +1,16 @@
+{
+  "name": "19_yarn",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./index.js",
+    "server": "node ./02_index.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "uniq": "^1.0.1",
+    "youngsdream_math": "^1.0.0"
+  },
+  "devDependencies": {}
+}
