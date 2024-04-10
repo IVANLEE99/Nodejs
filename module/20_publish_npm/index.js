@@ -12,3 +12,4 @@ module.exports = {
   sub,
   muti,
 };
+// npm unpublish youngsdream_math --force
