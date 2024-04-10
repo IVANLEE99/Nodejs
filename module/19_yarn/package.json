@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "uniq": "^1.0.1",
-    "youngsdream_math": "^1.0.0"
+    "youngsdream_math": "^1.0.1"
   },
   "devDependencies": {}
 }
