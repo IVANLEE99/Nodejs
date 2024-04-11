@@ -15,6 +15,7 @@ function recordMiddleware(req, res, next) {
 }
 app.use(express.static(__dirname + "/public"));
 app.use(recordMiddleware);
+
 const checkCodeMiddleware = (req, res, next) => {
   let { code } = req.query;
   if (+code === 521) {

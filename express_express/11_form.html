@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>请登录</h1>
+    <form action="/login" method="post">
+      <div>
+        <span>用户名：</span><input type="text" name=username" value="">
+      </div>
+      <br />
+      <div><span>密码：</span><input type="password" name=pwd" value=""></div>
+      <br />
+      <button type="submit">提交</button>
+    </form>
+    <div onclick="postApi()">post /api/user</div>
+    <script>
+      function postApi(params) {
+        console.log(params);
+        fetch("/api/users", {
+          method: "post",
+          headers: {
+            "Content-Type": "application/json",
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: JSON.stringify({
+            username: 123,
+            pwd: 123,
+          }),
+        });
+      }
+    </script>
+  </body>
+</html>
