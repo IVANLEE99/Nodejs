@@ -107,8 +107,6 @@
       }
 
       li span {
-        float: left;
-        width: 46%;
         height: 3rem;
         line-height: 3rem;
       }
@@ -119,6 +117,8 @@
 
       li .money {
         text-align: right;
+        float: right;
+        padding-right: 15px;
       }
 
       li .del {
@@ -137,6 +137,9 @@
 
       li:hover .del {
         display: block;
+      }
+      .del a {
+        text-decoration: none;
       }
     </style>
   </head>
@@ -157,18 +160,28 @@
       </section>
       <h2>历史记录</h2>
       <ul>
-        <!-- <li style="border-right: 4px solid skyblue;">
-		                <span class="name">投资</span>
-		                <span class="money">￥-1.00</span>
-		                <span class="del">X</span>
-		            </li> -->
+        <% list.forEach(item => { %> <% if (+item.type>0) { %>
+        <li style="border-right: 4px solid skyblue">
+          <span class="time"><%= item.time %></span>
+          <span class="name"><%= item.title %></span>
+          <span class="money">￥+<%= item.account %></span>
+          <span class="del"><a href="/account/<%= item.id %>">X</a></span>
+        </li>
+        <% } else { %>
+        <li style="border-right: 4px solid red">
+          <span class="time"><%= item.time %></span>
+          <span class="name"><%= item.title %></span>
+          <span class="money">￥-<%= item.account %></span>
+          <span class="del"><a href="/account/<%= item.id %>">X</a></span>
+        </li>
+        <% } %> <% }) %>
       </ul>
-      <h2>添加新交易</h2>
-      <p class="show">交易名称</p>
+      <h2><a href="/account/create">添加新交易</a></h2>
+      <!-- <p class="show">交易名称</p>
       <input id="name" type="text" placeholder="请输入名称" />
       <p class="show">金额(支出-负数，收入+正数)</p>
       <input id="money" type="text" placeholder="请输入金额" />
-      <div id="add">添加新交易</div>
+      <div id="add">添加新交易</div> -->
     </div>
   </body>
 </html>
