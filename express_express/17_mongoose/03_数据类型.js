@@ -7,6 +7,10 @@ mongoose.connection.on("open", () => {
     name: String,
     author: String,
     price: Number,
+    is_hot: Boolean,
+    tags: Array,
+    pub_time: Date,
+    // test: mongoose.Types.Mixed,
   });
   let BookModel = mongoose.model("books", bookSchema);
 
@@ -14,6 +18,10 @@ mongoose.connection.on("open", () => {
     name: "西游记",
     author: "吴承恩",
     price: 200,
+    is_hot: true,
+    pub_time: new Date(),
+    tags: ["国学", "名著", "文学"],
+    test: "dfdfdf",
   }).then((err, data) => {
     console.error("err", err);
     console.log("data", data);
