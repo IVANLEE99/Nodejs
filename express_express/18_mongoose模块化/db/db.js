@@ -1,6 +1,7 @@
+const { DBHOST, DBPORT, DBNAME } = require("../config/config");
 module.exports = function (success, error, close) {
   const mongoose = require("mongoose");
-  mongoose.connect("mongodb://127.0.0.1:27017/bilibili");
+  mongoose.connect(`mongodb://${DBHOST}:${DBPORT}/${DBNAME}`);
 
   mongoose.connection.on("open", () => {
     success && success();
