@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>简易计账</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        box-sizing: border-box;
+      }
+
+      html {
+        font-size: 62.5%;
+      }
+
+      body {
+        background-color: #f1f1f1;
+      }
+
+      .container {
+        width: 400px;
+        padding: 50px;
+        /* background-color: pink; */
+        margin: 0 auto;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .container > p:nth-of-type(2) {
+        line-height: 4rem;
+        font-size: 3.2rem;
+      }
+
+      section {
+        height: 60px;
+        padding: 10px;
+        background-color: white;
+        margin-top: 2rem;
+        box-shadow: 1px 1px 3px lightgray;
+      }
+
+      section .item {
+        width: 50%;
+        height: 100%;
+        float: left;
+        border-right: 1px solid lightgray;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: center;
+      }
+
+      section .zhichu {
+        border: 0;
+      }
+
+      section .item p {
+        width: 100%;
+        text-align: center;
+        font-size: 1.6rem;
+        font-weight: 900;
+      }
+
+      h2 {
+        line-height: 4rem;
+        font-size: 1.8rem;
+        border-bottom: 1px solid lightgray;
+        margin-top: 1.5rem;
+      }
+
+      .show {
+        line-height: 3.6rem;
+        font-size: 1.6rem;
+      }
+
+      input {
+        display: block;
+        width: 100%;
+        height: 3rem;
+        font-size: 1.2rem;
+        text-indent: 2.4rem;
+      }
+
+      #add {
+        height: 3rem;
+        line-height: 3rem;
+        font-size: 1.4rem;
+        color: white;
+        background-color: darkcyan;
+        text-align: center;
+        margin-top: 2rem;
+      }
+
+      #add:hover {
+        cursor: pointer;
+      }
+
+      li {
+        height: 3rem;
+        background-color: white;
+        margin: 1rem auto;
+        font-size: 1.2rem;
+        position: relative;
+      }
+
+      li span {
+        height: 3rem;
+        line-height: 3rem;
+      }
+
+      li .name {
+        margin-left: 2%;
+      }
+
+      li .money {
+        text-align: right;
+        float: right;
+        padding-right: 15px;
+      }
+
+      li .del {
+        width: 2rem;
+        height: 2rem;
+        line-height: 2rem;
+        text-align: center;
+        color: white;
+        font-size: 1.2rem;
+        background-color: tomato;
+        position: absolute;
+        left: -2rem;
+        top: 0.5rem;
+        display: none;
+      }
+
+      li:hover .del {
+        display: block;
+      }
+      .del a {
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>记账本</h1>
+      <p style="margin-top: 2rem">您的余额</p>
+      <p>￥<span id="yue">0</span></p>
+      <section>
+        <div class="item shouru">
+          <p>收入</p>
+          <p style="color: skyblue">￥<span id="shouru">0.00</span></p>
+        </div>
+        <div class="item zhichu">
+          <p>支出</p>
+          <p style="color: tomato">￥<span id="zhichu">0.00</span></p>
+        </div>
+      </section>
+      <h2>历史记录</h2>
+      <ul>
+        <% list.forEach(item => { %> <% if (+item.type>0) { %>
+        <li style="border-right: 4px solid skyblue">
+          <span class="time"
+            ><%= moment(item.time).format("YYYY-MM-DD") %></span
+          >
+          <span class="name"><%= item.title %></span>
+          <span class="money">￥+<%= item.account %></span>
+          <span class="del"
+            ><a class="del-a" href="/account/<%= item.id %>">X</a></span
+          >
+        </li>
+        <% } else { %>
+        <li style="border-right: 4px solid red">
+          <span class="time"
+            ><%= moment(item.time).format("YYYY-MM-DD") %></span
+          >
+          <span class="name"><%= item.title %></span>
+          <span class="money">￥-<%= item.account %></span>
+          <span class="del"
+            ><a class="del-a" href="/account/<%= item.id %>">X</a></span
+          >
+        </li>
+        <% } %> <% }) %>
+      </ul>
+      <h2><a href="/account/create">添加新交易</a></h2>
+      <!-- <p class="show">交易名称</p>
+      <input id="name" type="text" placeholder="请输入名称" />
+      <p class="show">金额(支出-负数，收入+正数)</p>
+      <input id="money" type="text" placeholder="请输入金额" />
+      <div id="add">添加新交易</div> -->
+    </div>
+    <script>
+      let a = document.querySelectorAll(".del-a");
+      a.forEach((item) => {
+        item.addEventListener("click", (e) => {
+          let conf = window.confirm("您确定要删除吗？");
+          if (conf) {
+            return;
+          } else {
+            e.preventDefault();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
