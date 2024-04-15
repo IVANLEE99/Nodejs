@@ -68,19 +68,32 @@ mongoose.connection.on("open", () => {
 
   //$and
 
-  //价格大于等于 20 小于等于 100
+  // //价格大于等于 20 小于等于 100
+  // novelModel
+  //   .find({
+  //     $and: [
+  //       {
+  //         price: { $gte: 20 },
+  //       },
+  //       {
+  //         price: {
+  //           $lte: 100,
+  //         },
+  //       },
+  //     ],
+  //   })
+  //   .then((data) => {
+  //     console.log(data);
+  //   })
+  //   .catch((err) => {
+  //     console.error(err);
+  //   });
+
+  //正则表达式
   novelModel
     .find({
-      $and: [
-        {
-          price: { $gte: 20 },
-        },
-        {
-          price: {
-            $lte: 100,
-          },
-        },
-      ],
+      // name: /三/,
+      name: new RegExp("三"),
     })
     .then((data) => {
       console.log(data);
