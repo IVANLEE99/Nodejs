@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <button id="checkout">checkout</button>
+    <script>
+      // Set your publishable key. Remember to change this to your live publishable key in production!
+      // See your keys here: https://dashboard.stripe.com/apikeys
+      let client_secret = "";
+      var stripe = Stripe("<%= $publicKey %>");
+      function confirmAffirmPayment(clientSecret) {
+        // Redirects away from the client
+        stripe
+          .confirmAffirmPayment(clientSecret, {
+            payment_method: {
+              // Billing information is optional but recommended to pass in.
+              billing_details: {
+                email: "jenny@rosen.com",
+                name: "Jenny Rosen",
+                address: {
+                  line1: "1234 Main Street",
+                  city: "San Francisco",
+                  state: "CA",
+                  country: "US",
+                  postal_code: "94111",
+                },
+              },
+            },
+
+            // Shipping information is optional but recommended to pass in.
+            shipping: {
+              name: "Jenny Rosen",
+              address: {
+                line1: "1234 Main Street",
+                city: "San Francisco",
+                state: "CA",
+                country: "US",
+                postal_code: "94111",
+              },
+            },
+            // Return URL where the customer should be redirected after the authorization.
+            return_url: "http://localhost:9000/checkout",
+          })
+          .then(function (result) {
+            if (result.error) {
+              // Inform the customer that there was an error.
+              console.log(result.error.message);
+            }
+          });
+      }
+      (async () => {
+        const response = await fetch("/secret");
+        const res = await response.json();
+        client_secret = res.client_secret;
+        // Render the form using the clientSecret
+      })();
+      document.getElementById("checkout").addEventListener("click", (e) => {
+        confirmAffirmPayment(client_secret);
+      });
+    </script>
+  </body>
+</html>
