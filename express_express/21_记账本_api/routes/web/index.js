@@ -21,4 +21,8 @@ router.get("/account", function (req, res, next) {
       res.send("查询失败～");
     });
 });
+//添加记录
+router.get("/account/create", function (req, res, next) {
+  res.render("create");
+});
 module.exports = router;

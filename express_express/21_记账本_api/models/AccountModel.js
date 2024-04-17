@@ -4,7 +4,8 @@ let AccountSchema = new mongoose.Schema({
   //标题
   title: {
     type: String,
-    require: true,
+    required: true,
+    unique:true
   },
   //时间
   time: Date,
@@ -16,12 +17,12 @@ let AccountSchema = new mongoose.Schema({
   //金额
   account: {
     type: Number,
-    require: true,
+    required: true,
   },
   //备注
   remarks: {
     type: String,
-    require: true,
+    required: true,
   },
 });
 let AccountModel = mongoose.model("accounts", AccountSchema);
