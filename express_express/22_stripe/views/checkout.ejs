@@ -5,14 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout</title>
     <script src="https://js.stripe.com/v3/"></script>
+    <style>
+      #affirm-message,
+      #payment-method-messaging-element {
+        height: 200px;
+      }
+    </style>
   </head>
   <body>
+    <div id="affirm-message"></div>
+    <div id="payment-method-messaging-element"></div>
     <button id="checkout">checkout</button>
     <script>
       // Set your publishable key. Remember to change this to your live publishable key in production!
       // See your keys here: https://dashboard.stripe.com/apikeys
       let client_secret = "";
-      var stripe = Stripe("<%= $publicKey %>");
+      var stripe = Stripe("<%= $publicKey %>", {
+        locale: "en",
+      });
       function confirmAffirmPayment(clientSecret) {
         // Redirects away from the client
         stripe
@@ -62,6 +72,50 @@
       document.getElementById("checkout").addEventListener("click", (e) => {
         confirmAffirmPayment(client_secret);
       });
+      function addMessage() {
+        const elements = stripe.elements();
+
+        const options = {
+          amount: 5000, // $50.00 USD
+          currency: "USD",
+        };
+
+        const affirmMessageElement = elements.create("affirmMessage", options);
+
+        affirmMessageElement.mount("#affirm-message");
+      }
+      function addPaymentMethodMessage() {
+        // Set your publishable key. Remember to change this to your live publishable key in production!
+        // See your keys here: https://dashboard.stripe.com/apikeys
+        // const stripe = Stripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
+        const appearance = {
+          variables: {
+            // colorText: "rgb(84, 51, 255)",
+            // colorTextSecondary: "rgb(28, 198, 255)", // info icon color
+            // fontSizeBase: "16px",
+            // spacingUnit: "10px",
+            // fontWeightMedium: "bolder",
+            // fontFamily: "Ideal Sans, system-ui, sans-serif",
+          },
+        };
+        const elements = stripe.elements({ appearance });
+        const options = {
+          amount: 9900, // $99.00 USD
+          currency: "USD",
+          // the country that the end-buyer is in
+          countryCode: "US",
+          paymentMethodTypes: ["affirm"],
+        };
+        const PaymentMessageElement = elements.create(
+          "paymentMethodMessaging",
+          options
+        );
+        PaymentMessageElement.mount("#payment-method-messaging-element");
+      }
+      setTimeout(() => {
+        addMessage();
+        addPaymentMethodMessage();
+      }, 5000);
     </script>
   </body>
 </html>
