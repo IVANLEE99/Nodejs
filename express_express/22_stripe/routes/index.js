@@ -29,7 +29,8 @@ router.get("/secret2", async (req, res) => {
         type: "affirm",
       },
       confirm: true,
-      return_url: "http://localhost:9000/checkout2",
+      return_url:
+        "http://localhost:3000/order/stripeAffirmPayReturnUrl?is_invalid_token=1",
       // automatic_payment_methods: {
       //   enabled: true,
       // },
@@ -46,9 +47,15 @@ router.get("/checkout", function (req, res, next) {
 router.get("/checkout2", function (req, res, next) {
   res.render("checkout2", { title: "Express", $publicKey });
 });
-router.get("/retrieve/:id", async function (req, res, next) {
+router.get("/retrieve", async function (req, res, next) {
+  // payment_intent=pi_3P8ZrvEmZ3YgtBNv1YZGE2Dj&payment_intent_client_secret=pi_3P8ZrvEmZ3YgtBNv1YZGE2Dj_secret_mscSkoEGETzZvHTCBKANUgzzM
   try {
-    const paymentIntent = await stripe.paymentIntents.retrieve(req.params.id);
+    const paymentIntent = await stripe.paymentIntents.retrieve(
+      req.query.payment_intent,
+      {
+        client_secret: req.query.payment_intent_client_secret,
+      }
+    );
     res.json({ ...paymentIntent });
   } catch (error) {
     res.json({ ...error });

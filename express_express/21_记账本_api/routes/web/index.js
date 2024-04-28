@@ -5,6 +5,9 @@ const shortid = require("shortid");
 const AccountModel = require("../../models/AccountModel");
 const moment = require("moment");
 const checkLoginMiddleware = require("../../middlewares/checkLoginMiddleware");
+router.get("/", (req, res, next) => {
+  res.redirect("/account");
+});
 /* account */
 //记账的列表
 router.get("/account", checkLoginMiddleware, function (req, res, next) {

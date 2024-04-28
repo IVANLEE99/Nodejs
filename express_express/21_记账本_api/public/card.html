@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input
+      autocomplete="cc-number"
+      type="tel"
+      autocorrect="off"
+      autocapitalize="none"
+      spellcheck="false"
+      class="number valid"
+      data-braintree-name="number"
+      name="credit-card-number"
+      id="credit-card-number"
+      maxlength="22"
+      aria-describedby="field-description-number"
+    />
+    <input type="text" name="expiration-month" autocomplete="cc-exp-month" />
+    <input type="text" name="expiration-year" autocomplete="cc-exp-year" />
+    <input
+      required
+      type="text"
+      id="security-code"
+      name="security-code"
+      inputmode="numeric"
+      minlength="3"
+      maxlength="4"
+      pattern="[0-9]+"
+    />
+    <!-- name="credit-card-number" autocomplete="cc-number" inputmode="numeric"
+
+name="expiration-month" autocomplete="cc-exp-month" 
+
+name="expiration-year" autocomplete="cc-exp-year" -->
+  </body>
+</html>
