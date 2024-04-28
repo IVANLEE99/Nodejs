@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>记账本Demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .transaction-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .transaction-list li {
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>记账本</h1>
+
+    <form action="/account" method="post">
+      <div>
+        <label for="title">
+          事项:
+          <input type="text" name="title" id="title" min="0" step="0.01" />
+        </label>
+      </div>
+     <div>
+        <label for="time">
+            时间:
+            <input type="date" name="time" id="time" />
+          </label>
+     </div>
+    </div>
+    <div>
+        <label for="type">
+            类型:
+            <select name="type" id="type">
+              <option value="1">收入</option>
+              <option value="-1">支出</option>
+            </select>
+          </label>
+    </div>
+      <div>
+        <label for="account">
+            金额:
+            <input
+              type="number"
+              name="account"
+              id="account"
+              min="0"
+              step="0.01"
+            />
+          </label>
+      </div>
+      <div><label for="remarks">
+        描述:
+        <input
+          type="text"
+          name="remarks"
+          id="remarks"
+        />
+      </label></div>
+      <button type="submit">添加记录</button>
+    </form>
+
+    <h2>记录列表</h2>
+    <ul class="transaction-list">
+      <!-- 这里将显示用户的交易记录 -->
+    </ul>
+
+    <script>
+      // 此处应该有用于处理表单提交和更新记录列表的JavaScript代码
+    </script>
+  </body>
+</html>
