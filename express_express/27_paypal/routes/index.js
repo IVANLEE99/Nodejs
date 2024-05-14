@@ -10,6 +10,10 @@ const username = process.env.CLIENT_ID;
 const password = process.env.API_KEY;
 console.log("---username----", username);
 console.log("---password----", password);
+
+const getAccessToken = require("../middlewares/getAccessToken.js");
+
+// express_express/27_paypal/middlewares/getAccessToken.js
 /* GET home page. */
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
@@ -40,15 +44,16 @@ router.get("/oauth2/token", async function (req, res, next) {
     res.json(JSON.stringify(error));
   }
 });
-router.get("/createOrder/:price", async (req, res) => {
+router.get("/createOrder/:price", getAccessToken, async (req, res) => {
   try {
-    fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
+    let url = "https://api-m.sandbox.paypal.com/v2/checkout/orders";
+    console.log(url);
+    fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "PayPal-Request-Id": "7b92603e-77ed-4896-8e78-5dea2050476a",
-        Authorization:
-          "Bearer A21AAJGMx5_iOWbQDMLJmVsJ1dt8_-wp2dVsrYpVVskV9ocjk5ThC2U0SGv6-dBlLdQC6aeTDQpNlvriYGO1EgflgIRDDIDjQ",
+        "PayPal-Request-Id": new Date().getTime(),
+        Authorization: req.__Authorization,
       },
       body: JSON.stringify({
         intent: "CAPTURE",
@@ -90,7 +95,7 @@ router.get("/createOrder/:price", async (req, res) => {
 // -H "Authorization: Bearer ACCESS-TOKEN" \
 // -d '{}'
 
-router.get("/capture/:id", async (req, res) => {
+router.get("/capture/:id", getAccessToken, async (req, res) => {
   try {
     fetch(
       `https://api-m.sandbox.paypal.com/v2/checkout/orders/${req.params.id}/capture`,
@@ -98,9 +103,8 @@ router.get("/capture/:id", async (req, res) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "PayPal-Request-Id": "7b92603e-77ed-4896-8e78-5dea2050476a",
-          Authorization:
-            "Bearer A21AAJGMx5_iOWbQDMLJmVsJ1dt8_-wp2dVsrYpVVskV9ocjk5ThC2U0SGv6-dBlLdQC6aeTDQpNlvriYGO1EgflgIRDDIDjQ",
+          "PayPal-Request-Id": new Date().getTime(),
+          Authorization: req.__Authorization,
         },
       }
     )
@@ -246,31 +250,114 @@ router.get("/capture/:id", async (req, res) => {
   }
 });
 
-router.get("/checkout_order_with_token/:vault_id", async (req, res) => {
-  try {
-    fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "PayPal-Request-Id": "7b92603e-77ed-4896-8e78-5dea2050476a",
-        Authorization:
-          "Bearer A21AAJGMx5_iOWbQDMLJmVsJ1dt8_-wp2dVsrYpVVskV9ocjk5ThC2U0SGv6-dBlLdQC6aeTDQpNlvriYGO1EgflgIRDDIDjQ",
-      },
-      body: JSON.stringify({
-        intent: "CAPTURE",
-        payment_source: {
-          paypal: {
-            vault_id: req.params.vault_id,
-          },
+router.get(
+  "/checkout_order_with_token/:vault_id",
+  getAccessToken,
+  async (req, res) => {
+    let url = "https://api-m.sandbox.paypal.com/v2/checkout/orders";
+    console.log(url);
+    try {
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "PayPal-Request-Id": new Date().getTime(),
+          Authorization: req.__Authorization,
         },
-        purchase_units: [
-          {
-            amount: {
-              currency_code: "USD",
-              value: "200.00",
+        body: JSON.stringify({
+          intent: "CAPTURE",
+          payment_source: {
+            paypal: {
+              vault_id: req.params.vault_id,
             },
           },
-        ],
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "USD",
+                value: "2000.00",
+              },
+            },
+          ],
+        }),
+      })
+        .then((r) => r.json())
+        .then((json) => res.json(json));
+      // console.log(req.body);
+    } catch (error) {
+      console.error(error);
+      res.json(JSON.stringify(error));
+    }
+  }
+);
+
+router.get(
+  "/v3/vault/payment-tokens/:SETUP_TOKEN",
+  getAccessToken,
+  async (req, res) => {
+    try {
+      fetch("https://api-m.sandbox.paypal.com/v3/vault/payment-tokens", {
+        method: "POST",
+        headers: {
+          Authorization: req.__Authorization,
+          "Content-Type": "application/json",
+          "PayPal-Request-ID": new Date().getTime(),
+        },
+        body: JSON.stringify({
+          payment_source: {
+            token: { id: req.params.SETUP_TOKEN, type: "SETUP_TOKEN" },
+          },
+        }),
+      })
+        .then((r) => r.json())
+        .then((json) => res.json(json));
+      // console.log(req.body);
+    } catch (error) {
+      console.error(error);
+      res.json(JSON.stringify(error));
+    }
+  }
+);
+router.get("/v3/vault/setup-tokens", getAccessToken, async (req, res) => {
+  try {
+    fetch("https://api-m.sandbox.paypal.com/v3/vault/setup-tokens", {
+      method: "POST",
+      headers: {
+        Authorization: req.__Authorization,
+        "Content-Type": "application/json",
+        "PayPal-Request-ID": new Date().getTime(),
+      },
+      body: JSON.stringify({
+        payment_source: {
+          paypal: {
+            description: "Description for PayPal to be shown to PayPal payer",
+            shipping: {
+              name: {
+                full_name: "Firstname Lastname",
+              },
+              address: {
+                address_line_1: "2211 N First Street",
+                address_line_2: "Building 17",
+                admin_area_2: "San Jose",
+                admin_area_1: "CA",
+                postal_code: "95131",
+                country_code: "US",
+              },
+            },
+            permit_multiple_payment_tokens: false,
+            usage_pattern: "IMMEDIATE",
+            usage_type: "MERCHANT",
+            customer_type: "CONSUMER",
+            experience_context: {
+              shipping_preference: "SET_PROVIDED_ADDRESS",
+              payment_method_preference: "IMMEDIATE_PAYMENT_REQUIRED",
+              brand_name: "EXAMPLE INC",
+              locale: "en-US",
+              return_url: "https://example.com/returnUrl",
+              cancel_url: "https://example.com/cancelUrl",
+            },
+          },
+        },
       }),
     })
       .then((r) => r.json())
@@ -281,4 +368,115 @@ router.get("/checkout_order_with_token/:vault_id", async (req, res) => {
     res.json(JSON.stringify(error));
   }
 });
+
+router.get(
+  "/v3/vault/payment-tokens/delete/:vault_id",
+  getAccessToken,
+  (req, res) => {
+    let url =
+      "https://api.sandbox.paypal.com/v3/vault/payment-tokens/" +
+      req.params.vault_id;
+    console.log(url);
+    try {
+      fetch(url, {
+        method: "DELETE",
+        headers: {
+          Authorization: req.__Authorization,
+          "Content-Type": "application/json",
+          "PayPal-Request-ID": new Date().getTime(),
+        },
+      })
+        .then((r) => {
+          console.log(r.status);
+          return r;
+        })
+        .then((json) => res.json(json))
+        .catch((err) => {
+          res.json(JSON.stringify(err));
+        });
+      // console.log(req.body);
+    } catch (error) {
+      console.error(error);
+      res.json(JSON.stringify(error));
+    }
+  }
+);
+
+router.get(
+  "/v3/vault/payment-tokens/all/:customer_id",
+  getAccessToken,
+  (req, res) => {
+    let url =
+      "https://api-m.sandbox.paypal.com/v3/vault/payment-tokens?customer_id=" +
+      req.params.customer_id;
+    console.log(url);
+    try {
+      fetch(url, {
+        headers: {
+          Authorization: req.__Authorization,
+        },
+      })
+        .then((r) => {
+          console.log(r.status);
+          return r;
+        })
+        .then((r) => r.json())
+        .then((json) => res.json(json))
+        .catch((err) => {
+          res.json(JSON.stringify(err));
+        });
+      // console.log(req.body);
+    } catch (error) {
+      console.error(error);
+      res.json(JSON.stringify(error));
+    }
+  }
+);
+
+router.get(
+  "/v3/vault/payment-tokens/token/:token",
+  getAccessToken,
+  (req, res) => {
+    let url =
+      "https://api-m.sandbox.paypal.com/v3/vault/payment-tokens/" +
+      req.params.token;
+    console.log(url);
+    try {
+      fetch(url, {
+        headers: {
+          Authorization: req.__Authorization,
+        },
+      })
+        .then((r) => {
+          console.log(r.status);
+          return r;
+        })
+        .then((r) => r.json())
+        .then((json) => res.json(json))
+        .catch((err) => {
+          res.json(JSON.stringify(err));
+        });
+      // console.log(req.body);
+    } catch (error) {
+      console.error(error);
+      res.json(JSON.stringify(error));
+    }
+  }
+);
+
+// var fetch = require('node-fetch');
+
+// fetch('https://api-m.sandbox.paypal.com/v3/vault/payment-tokens/8kk8451t', {
+//     headers: {
+//         'Authorization': 'Bearer FULL_scoped_access_token'
+//     }
+// });
+// var fetch = require('node-fetch');
+
+// fetch('https://api-m.sandbox.paypal.com/v3/vault/payment-tokens?customer_id=customer_4029352050', {
+//     headers: {
+//         'Authorization': 'Bearer FULL_scoped_access_token'
+//     }
+// });
+
 module.exports = router;

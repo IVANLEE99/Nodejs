@@ -7,7 +7,8 @@ const stripe = require("stripe")($privateKey);
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
-router.get("/secret", async (req, res) => {
+// affirm
+router.get("/affirm/secret", async (req, res) => {
   const intent = await stripe.paymentIntents.create({
     amount: 6000,
     currency: "usd",
@@ -18,8 +19,8 @@ router.get("/secret", async (req, res) => {
   }); // ... Fetch or create the PaymentIntent
   res.json({ client_secret: intent.client_secret });
 });
-
-router.get("/secret2", async (req, res) => {
+// affirm
+router.get("/affirm/secret2", async (req, res) => {
   try {
     const intent = await stripe.paymentIntents.create({
       amount: 6000,
