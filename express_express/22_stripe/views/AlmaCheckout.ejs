@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+      #paymentIntentJson,
+      #paymentIntentNextActionJson {
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="checkout">Alma Checkout</button>
+    <div>
+      <h5>paymentIntent json</h5>
+      <div id="secretJson"></div>
+    </div>
+    <div>
+      <h5>paymentIntent next_action json</h5>
+      <div id="secretNextActionJson"></div>
+    </div>
+    <script>
+      let client_secret = "";
+      var stripe = Stripe("<%= $publicKey %>", {
+        locale: "en",
+      });
+      // Set your publishable key. Remember to change this to your live publishable key in production!
+      // See your keys here: https://dashboard.stripe.com/apikeys
+      let secret = "";
+      (async () => {
+        const response = await fetch("/Alma/secret");
+        const res = await response.json();
+        console.log(res);
+        secret = res;
+        document.getElementById("secretJson").innerText =
+          JSON.stringify(secret);
+        document.getElementById("secretNextActionJson").innerText =
+          JSON.stringify(secret?.intent?.next_action);
+
+        // Render the form using the clientSecret
+      })();
+      document
+        .getElementById("checkout")
+        .addEventListener("click", async (e) => {
+          // Set the clientSecret of the PaymentIntent
+          // const { error } = await stripe.confirmPayment({
+          //   clientSecret: secret?.client_secret || "",
+          //   confirmParams: {
+          //     payment_method_data: {
+          //       type: "alma",
+          //     },
+          //     // Return URL where the customer should be redirected after the authorization
+          //     return_url: `${window.location.href}`,
+          //   },
+          // });
+
+          // if (error) {
+          //   // Inform the customer that there was an error.
+          //   const errorElement = document.getElementById("error-message");
+          //   errorElement.textContent = result.error.message;
+          // }
+          window.location.href = secret?.intent?.next_action?.redirect_to_url?.url;
+        });
+    </script>
+  </body>
+</html>
