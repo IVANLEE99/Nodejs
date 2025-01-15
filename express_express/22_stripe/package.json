@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "cross-env NODE_ENV=development nodemon ./bin/www",
+    "us": "cross-env NODE_ENV=developmentUS nodemon ./bin/www",
     "dev": "cross-env NODE_ENV=development nodemon ./bin/www",
     "build:test": "cross-env NODE_ENV=production.dev nodemon ./bin/www",
     "build:pre": "cross-env NODE_ENV=release nodemon ./bin/www",

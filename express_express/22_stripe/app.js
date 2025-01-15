@@ -6,6 +6,7 @@ var logger = require("morgan");
 
 var indexRouter = require("./routes/index");
 var AlmaRouter = require("./routes/Alma");
+var KlarnaRouter = require("./routes/Klarna");
 var saveCardRouter = require("./routes/save_card.js");
 
 // express_express/22_stripe/routes/save_card.js
@@ -27,6 +28,7 @@ app.use("/", indexRouter);
 app.use("/", saveCardRouter)
 app.use("/users", usersRouter);
 app.use("/", AlmaRouter);
+app.use("/", KlarnaRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
