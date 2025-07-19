@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout</title>
     <script src="https://js.stripe.com/v3/"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@alma/widgets@3.x.x/dist/widgets.min.css"
-    />
     <style>
       #affirm-message,
       #payment-method-messaging-element {
@@ -18,10 +14,8 @@
   </head>
   <body>
     <div id="affirm-message"></div>
-    <div id="alma-widget"></div>
     <div id="payment-method-messaging-element"></div>
     <button id="checkout">checkout</button>
-    <script src="https://cdn.jsdelivr.net/npm/@alma/widgets@3.x.x/dist/widgets.umd.js"></script>
     <script>
       // Set your publishable key. Remember to change this to your live publishable key in production!
       // See your keys here: https://dashboard.stripe.com/apikeys
@@ -121,29 +115,6 @@
       setTimeout(() => {
         addMessage();
         addPaymentMethodMessage();
-        var widgets = Alma.Widgets.initialize(
-          "acct_1PM4THEKvbxSm4Hq", // ID marchand
-          Alma.ApiMode.TEST // mode de l'API (LIVE ou TEST)
-        );
-        widgets.add(Alma.Widgets.PaymentPlans, {
-          container: "#alma-widget",
-          purchaseAmount: 45000,
-          locale: "fr",
-          hideIfNotEligible: false,
-          plans: [
-            {
-              installmentsCount: 1,
-              deferredDays: 30,
-              minAmount: 5000,
-              maxAmount: 50000,
-            },
-            {
-              installmentsCount: 3,
-              minAmount: 5000,
-              maxAmount: 50000,
-            },
-          ],
-        });
       }, 5000);
     </script>
   </body>

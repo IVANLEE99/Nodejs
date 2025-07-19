@@ -1,42 +1,160 @@
 var express = require("express");
+const axios = require('axios');
 var router = express.Router();
 const $publicKey = process.env.PUBLIC_KEY;
 const $privateKey = process.env.PRIVATE_KEY;
 const stripe = require("stripe")($privateKey);
+const getAccessToken = require("../middlewares/getAccessToken.js");
 /* GET home page. */
 router.get("/Klarna/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
 // affirm
-router.get("/Klarna/secret", async (req, res) => {
-  const intent = await stripe.paymentIntents.create({
-    payment_method_types: ["klarna"],
-    payment_method_data: {
-      type: "klarna",
-      billing_details: {
-        email: "customer@example.com",
-        address: {
-          country: "GB",
-        },
-      },
+router.get("/Klarna/secret", getAccessToken, async (req, res) => {
+  // const intent = await stripe.paymentIntents.create({
+  //   payment_method_types: ['klarna'],
+  //   payment_method_data: {
+  //     type: "klarna",
+  //     billing_details: {
+  //       email: 'customer@example.com',
+  //       address: {
+  //         country: 'US',
+  //       },
+  //     },
+  //   },
+  //   confirm: true,
+  //   amount: 5099,
+  //   currency: 'usd',
+  //   return_url:
+  //   "http://localhost:3000/order/stripeAffirmPayReturnUrl?is_invalid_token=1",
+  // }); // ... Fetch or create the PaymentIntent
+  // res.json({ client_secret: intent.client_secret, intent });
+
+
+  let time = new Date().getTime()
+  const requestBody = {
+    "request_id": time,
+    "merchant_order_id": time,
+    "amount": 100.01,
+    "currency": "EUR",
+    "order": {
+      "products": [
+        {
+          "category": "Apparel and accessories",
+          "code": "3414314111",
+          "desc": "IPHONE 7",
+          "effective_end_at": "2020-12-31T23:59:59Z",
+          "effective_start_at": "2020-01-01T00:00:00Z",
+          "image_url": "https://example.airwallex.com/product/12345.png",
+          "name": "IPHONE7",
+          "quantity": 5,
+          "seller": {
+            "identifier": "string",
+            "name": "string"
+          },
+          "sku": "100004",
+          "type": "physical",
+          "unit_price": 100.01,
+          "url": "https://example.airwallex.com/product/12345"
+        }
+      ],
+      "shipping": {
+        "first_name": "John",
+        "last_name": "Shooper",
+        "phone_number": "+491713920016",
+        "address": {
+          "country_code": "DE",
+          "city": "Berlin",
+          "postcode": "546080",
+          "street": "16 Sandilands Road"
+        }
+      }
     },
-    confirm: true,
-    amount: 5099,
-    currency: "gbp",
-    return_url: "http://localhost:9000/klarna/checkout",
-  }); // ... Fetch or create the PaymentIntent
-  res.json({ client_secret: intent.client_secret, intent });
+    return_url: 'http://localhost:9000/klarna/checkout'
+
+  };
+
+  axios
+    .request({
+      url: 'https://api-demo.airwallex.com/api/v1/pa/payment_intents/create',
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.__Authorization,
+      },
+      data: requestBody,
+    })
+    .then(({ data }) => {
+      // console.log(data)
+      res.json(data)
+    })
+    .catch(error => { console.error(error) });
+
 });
 // affirm
-router.post("/Klarna/confirm", async (req, res) => {
-  const paymentIntent = await stripe.paymentIntents.confirm(
-    req.body.payment_intent,
-    {
-      payment_method: req.body.payment_method,
-      return_url: req.body.return_url,
+router.post("/Klarna/confirm/:payment_intent", getAccessToken, async (req, res) => {
+  let time = new Date().getTime()
+  const requestBody = {
+    "request_id": time,
+    "payment_method": {
+      "type": "klarna",
+      "klarna": {
+        "country_code": "DE",
+        "language": "en",
+        "billing": {
+          "date_of_birth": "2011-10-12",
+          "email": "customer@email.de",
+          "first_name": "John",
+          "last_name": "Shopper",
+          "phone_number": "+491713920016",
+          "address": {
+            "country_code": "DE",
+            "city": "Berlin",
+            "street": "Neue Schönhauser St",
+            "postcode": "10178"
+          }
+        }
+      }
+    },
+    "payment_method_options": {
+      "klarna": {
+        "auto_capture": false
+      }
     }
-  );
-  res.json(paymentIntent);
+  }
+  axios
+    .request({
+      url: `https://api-demo.airwallex.com/api/v1/pa/payment_intents/${req.params.payment_intent}/confirm`,
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.__Authorization,
+      },
+      data: requestBody,
+    })
+    .then(({ data }) => { res.json(data) })
+    .catch(error => {
+      console.error(error)
+      res.json(error)
+    });
+  // res.json(paymentIntent);
+});
+router.get("/Klarna/retrieve/:payment_intent", getAccessToken, async (req, res) => {
+  axios
+    .request({
+      url: `https://api-demo.airwallex.com/api/v1/pa/payment_intents/${req.params.payment_intent}`,
+      method: 'get',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.__Authorization,
+      },
+    })
+    .then(({ data }) => { res.json(data) })
+    .catch(error => {
+      console.error(error)
+      res.json(error)
+    });
+  // res.json(paymentIntent);
 });
 // affirm
 router.get("/Klarna/affirm/secret2", async (req, res) => {
@@ -177,16 +295,5 @@ router.get("/Klarna/payment_methods/:id", async function (req, res, next) {
     res.json({ ...error });
   }
   // res.render("checkout2", { title: "Express", $publicKey });
-});
-router.get("/stripe/v1/payment_intents/:id", async (req, res) => {
-  try {
-    const paymentIntent = await stripe.paymentIntents.retrieve(req.params.id);
-
-    res.json(paymentIntent);
-    // return generateResponse(res, intent);
-  } catch (error) {
-    console.error(error);
-    res.json(JSON.stringify(error));
-  }
 });
 module.exports = router;

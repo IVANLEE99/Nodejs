@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KlarnaCheckout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+      #paymentIntentJson,
+      #paymentIntentNextActionJson {
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="checkout">Klarna Checkout</button>
+    <div>
+      <h5>paymentIntent json</h5>
+      <div id="secretJson"></div>
+    </div>
+    <div>
+      <h5>paymentIntent next_action json</h5>
+      <div id="secretNextActionJson"></div>
+    </div>
+    <script>
+      let payment_intent_id = "";
+      let client_secret = "";
+      let secret = "";
+      (async () => {
+        const response = await fetch("/Klarna/secret");
+        const res = await response.json();
+        console.log(res);
+        secret = res;
+        payment_intent_id = res?.id;
+        document.getElementById("secretJson").innerText =
+          JSON.stringify(secret);
+        document.getElementById("secretNextActionJson").innerText =
+          JSON.stringify(secret?.intent?.next_action);
+
+        // Render the form using the clientSecret
+      })();
+      document
+        .getElementById("checkout")
+        .addEventListener("click", async (e) => {
+          
+          // window.location.href = secret?.intent?.next_action?.redirect_to_url?.url;
+        });
+    </script>
+  </body>
+</html>

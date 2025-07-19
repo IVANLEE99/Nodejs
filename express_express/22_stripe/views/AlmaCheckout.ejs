@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout</title>
     <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@alma/widgets@3.x.x/dist/widgets.umd.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@alma/widgets@3.x.x/dist/widgets.min.css"
+    />
     <style>
       #paymentIntentJson,
       #paymentIntentNextActionJson {
@@ -13,6 +18,7 @@
     </style>
   </head>
   <body>
+    <div id="alma-widget"></div>
     <button id="checkout">Alma Checkout</button>
     <div>
       <h5>paymentIntent json</h5>
@@ -62,8 +68,37 @@
           //   const errorElement = document.getElementById("error-message");
           //   errorElement.textContent = result.error.message;
           // }
-          window.location.href = secret?.intent?.next_action?.redirect_to_url?.url;
+          window.location.href =
+            secret?.intent?.next_action?.redirect_to_url?.url;
         });
+
+      setTimeout(() => {
+        var widgets = Alma.Widgets.initialize(
+          "merchant_120SGb45JzxtFQb9iuvXUNkRBZYUB5G8eS", // ID marchand
+          Alma.ApiMode.TEST // mode de l'API (LIVE ou TEST)
+        );
+        widgets.add(Alma.Widgets.PaymentPlans, {
+          container: "#alma-widget",
+          purchaseAmount: 12000,
+          locale: "fr",
+          hideIfNotEligible: false,
+          transitionDelay: 5500,
+          monochrome: true,
+          hideBorder: true,
+          plans: [
+            {
+              installmentsCount: 3,
+              minAmount: 8000,
+              maxAmount: 200000,
+            },
+            {
+              installmentsCount: 4,
+              minAmount: 15000,
+              maxAmount: 200000,
+            },
+          ],
+        });
+      }, 5000);
     </script>
   </body>
 </html>

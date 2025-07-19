@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <!-- <script src="https://js.stripe.com/v3/"></script> -->
+    <style>
+      #paymentIntentJson,
+      #paymentIntentNextActionJson {
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="checkout">
+      stripe Affirm checkout- Handle the Affirm redirect manually
+    </button>
+    <div>
+      <h5>paymentIntent json</h5>
+      <div id="paymentIntentJson"></div>
+    </div>
+    <div>
+      <h5>paymentIntent next_action json</h5>
+      <div id="paymentIntentNextActionJson"></div>
+    </div>
+    <script>
+      // Set your publishable key. Remember to change this to your live publishable key in production!
+      // See your keys here: https://dashboard.stripe.com/apikeys
+      let paymentIntent = "";
+      (async () => {
+        const response = await fetch("/secret2");
+        const res = await response.json();
+        paymentIntent = res.intent;
+        document.getElementById("paymentIntentJson").innerText =
+          JSON.stringify(paymentIntent);
+        document.getElementById("paymentIntentNextActionJson").innerText =
+          JSON.stringify(paymentIntent.next_action);
+
+        // Render the form using the clientSecret
+      })();
+      document.getElementById("checkout").addEventListener("click", (e) => {
+        // confirmAffirmPayment(paymentIntent);
+        var iframe = document.createElement("iframe");
+        iframe.allow = "accelerometer *;payment *;gyroscope *";
+        iframe.allowpaymentrequest = true;
+        iframe.src = paymentIntent.next_action.redirect_to_url.url;
+        iframe.width = 600;
+        iframe.height = 400;
+        document.body.appendChild(iframe);
+      });
+    </script>
+  </body>
+</html>
