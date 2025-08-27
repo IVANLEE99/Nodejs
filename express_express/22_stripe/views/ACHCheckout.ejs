@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/basil/stripe.js"></script>
+    <style></style>
+  </head>
+  <body>
+    <!-- <div id="alma-widget"></div>
+    <button id="checkout">Alma Checkout</button>
+    <div>
+      <h5>paymentIntent json</h5>
+      <div id="secretJson"></div>
+    </div>
+    <div>
+      <h5>paymentIntent next_action json</h5>
+      <div id="secretNextActionJson"></div>
+    </div> -->
+    <form id="payment-form">
+      <div id="payment-element">
+        <!-- Elements will create form elements here -->
+      </div>
+      <button id="submit">Submit</button>
+      <div id="error-message">
+        <!-- Display error message to your customers here -->
+      </div>
+    </form>
+    <script>
+      let client_secret = "";
+      var stripe = Stripe("<%= $publicKey %>", {
+        locale: "en",
+      });
+      var elements;
+
+      // document
+      //   .getElementById("checkout")
+      //   .addEventListener("click", async (e) => {
+      //     // Set the clientSecret of the PaymentIntent
+      //     // const { error } = await stripe.confirmPayment({
+      //     //   clientSecret: secret?.client_secret || "",
+      //     //   confirmParams: {
+      //     //     payment_method_data: {
+      //     //       type: "alma",
+      //     //     },
+      //     //     // Return URL where the customer should be redirected after the authorization
+      //     //     return_url: `${window.location.href}`,
+      //     //   },
+      //     // });
+
+      //     // if (error) {
+      //     //   // Inform the customer that there was an error.
+      //     //   const errorElement = document.getElementById("error-message");
+      //     //   errorElement.textContent = result.error.message;
+      //     // }
+      //     window.location.href =
+      //       secret?.intent?.next_action?.redirect_to_url?.url;
+      //   });
+      let initFunction = async () => {
+        const options = {
+          mode: "payment",
+          amount: 1099,
+          currency: "usd",
+          paymentMethodTypes: ["us_bank_account"],
+          // Fully customizable with appearance API.
+          appearance: {
+            /*...*/
+          },
+        };
+
+        // Set up Stripe.js and Elements to use in checkout form
+        elements = stripe.elements(options);
+
+        // Create and mount the Payment Element
+        const paymentElementOptions = { layout: "accordion" };
+        const paymentElement = elements.create(
+          "payment",
+          paymentElementOptions
+        );
+        paymentElement.mount("#payment-element");
+      };
+      let checkoutFunction = async () => {
+        const form = document.getElementById("payment-form");
+        const submitBtn = document.getElementById("submit");
+
+        const handleError = (error) => {
+          const messageContainer = document.querySelector("#error-message");
+          messageContainer.textContent = error.message;
+          submitBtn.disabled = false;
+        };
+
+        form.addEventListener("submit", async (event) => {
+          // We don't want to let default form submission happen here,
+          // which would refresh the page.
+          event.preventDefault();
+
+          // Prevent multiple form submissions
+          if (submitBtn.disabled) {
+            return;
+          }
+
+          // Disable form submission while loading
+          submitBtn.disabled = true;
+
+          // Trigger form validation and wallet collection
+          const { error: submitError } = await elements.submit();
+          if (submitError) {
+            handleError(submitError);
+            return;
+          }
+
+          // Create the PaymentIntent and obtain clientSecret
+          const res = await fetch("/ACH/create-intent", {
+            method: "POST",
+          });
+
+          const { client_secret: clientSecret } = await res.json();
+
+          // Confirm the PaymentIntent using the details collected by the Payment Element
+          const { error } = await stripe.confirmPayment({
+            elements,
+            clientSecret,
+            confirmParams: {
+              return_url: "/ACHCheckout",
+            },
+          });
+          // https://example.com/order/123/complete?payment_intent=pi_3S0dy7B8QNjq61KH0MZR1cQh&payment_intent_client_secret=pi_3S0dy7B8QNjq61KH0MZR1cQh_secret_uw3hKVnnsWTJgyP20mppgWwjn&redirect_status=succeeded
+
+          if (error) {
+            // This point is only reached if there's an immediate error when
+            // confirming the payment. Show the error to your customer (for example, payment details incomplete)
+            handleError(error);
+          } else {
+            // Your customer is redirected to your `return_url`. For some payment
+            // methods like iDEAL, your customer is redirected to an intermediate
+            // site first to authorize the payment, then redirected to the `return_url`.
+          }
+        });
+      };
+      setTimeout(() => {
+        initFunction();
+        checkoutFunction();
+      }, 5000);
+    </script>
+  </body>
+</html>

@@ -8,6 +8,7 @@ var indexRouter = require("./routes/index");
 var AlmaRouter = require("./routes/Alma");
 var KlarnaRouter = require("./routes/Klarna");
 var saveCardRouter = require("./routes/save_card.js");
+var ACHRouter = require("./routes/ACH");
 
 // express_express/22_stripe/routes/save_card.js
 var usersRouter = require("./routes/users");
@@ -25,10 +26,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/", saveCardRouter)
+app.use("/", saveCardRouter);
 app.use("/users", usersRouter);
 app.use("/", AlmaRouter);
 app.use("/", KlarnaRouter);
+app.use("/", ACHRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
