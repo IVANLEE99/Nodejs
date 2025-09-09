@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/basil/stripe.js"></script>
+    <style></style>
+  </head>
+  <body>
+    <!-- <div id="alma-widget"></div>
+    <button id="checkout">Alma Checkout</button>
+    <div>
+      <h5>paymentIntent json</h5>
+      <div id="secretJson"></div>
+    </div>
+    <div>
+      <h5>paymentIntent next_action json</h5>
+      <div id="secretNextActionJson"></div>
+    </div> -->
+    <div>
+      <h5>customer:id</h5>
+      <input id="customer" value="cus_SwX1z4RawKC9ZL" />
+      <button id="getClientSecret">getClientSecret</button>
+    </div>
+    <hr />
+    <div id="secretJson"></div>
+    <div id="intentJson"></div>
+    <hr />
+    <form id="confirmation-form" action="">
+      We collected an account - possibly instantly verified, but possibly
+      manually-entered. Display payment method details and mandate text to the
+      customer and confirm the intent once they accept the mandate. 在完成
+      SetupIntent
+      并为客户保存付款方式详细信息之前，您必须通过显示授权条款让客户接受，以获得付款授权。
+      <button id="confirm-payment-intent" type="submit">接受授权</button>
+    </form>
+    <hr />
+    <form id="payment-method-form">
+      <div id="payment-element">
+        <!-- Elements will create form elements here -->
+      </div>
+      <button id="submit">Submit</button>
+      <div id="error-message">
+        <!-- Display error message to your customers here -->
+      </div>
+    </form>
+    <script>
+      let client_secret = "";
+      let setupIntentClientSecret = "";
+      var stripe = Stripe("<%= $publicKey %>", {
+        locale: "en",
+      });
+      var elements;
+      function getClientSecret() {
+        const customer = document.getElementById("customer").value;
+        (async () => {
+          const response = await fetch(`/ACH/secret/${customer}`);
+          const { client_secret: clientSecret, intent } = await response.json();
+          client_secret = clientSecret;
+          // Render the form using the clientSecret
+          document.getElementById("secretJson").innerHTML =
+            JSON.stringify(clientSecret);
+          document.getElementById("intentJson").innerHTML =
+            JSON.stringify(intent);
+        })();
+        checkoutFunction();
+      }
+
+      let confirmPaymentIntentFn = async (confirmationForm) => {
+        confirmationForm.addEventListener("submit", (ev) => {
+          ev.preventDefault();
+          stripe
+            .confirmUsBankAccountSetup(client_secret)
+            .then((data) => {
+              console.log("confirmUsBankAccountSetup==>", data);
+              const { setupIntent, error } = data;
+              if (error) {
+                console.error(error.message);
+                // The payment failed for some reason.
+              } else if (setupIntent.status === "requires_payment_method") {
+                // Confirmation failed. Attempt again with a different payment method.
+              } else if (setupIntent.status === "succeeded") {
+                // Confirmation succeeded! The account is now saved.
+                // Display a message to customer.
+              } else if (
+                setupIntent.next_action?.type === "verify_with_microdeposits"
+              ) {
+                // The account needs to be verified through microdeposits.
+                // Display a message to consumer with next steps (consumer waits for
+                // microdeposits, then enters a statement descriptor code on a page sent to them through email).
+              }
+            });
+        });
+      };
+      let checkoutFunction = async () => {
+        // Use the form that already exists on the web page.
+        const paymentMethodForm = document.getElementById(
+          "payment-method-form"
+        );
+        const confirmationForm = document.getElementById("confirmation-form");
+        confirmationForm.style.display = "none";
+        confirmationForm.style.backgroundColor = "pink";
+
+        paymentMethodForm.addEventListener("submit", (ev) => {
+          ev.preventDefault();
+          const accountHolderNameField = document.getElementById(
+            "account-holder-name-field"
+          );
+          const emailField = document.getElementById("email-field");
+
+          // Calling this method will open the instant verification dialog.
+          stripe
+            .collectBankAccountForPayment({
+              clientSecret: client_secret,
+              params: {
+                payment_method_type: "us_bank_account",
+                payment_method_data: {
+                  billing_details: {
+                    name: accountHolderNameField?.value || "youngs",
+                    email: emailField?.value || "5@qq.com",
+                  },
+                },
+              },
+              expand: ["payment_method"],
+            })
+            .then(async (data) => {
+              console.log("collectBankAccountForPayment==>", data);
+              const { paymentIntent, error } = data;
+              if (error) {
+                console.error(error.message);
+                // PaymentMethod collection failed for some reason.
+              } else if (paymentIntent.status === "requires_payment_method") {
+                // Customer canceled the hosted verification modal. Present them with other
+                // payment method type options.
+              } else if (paymentIntent.status === "requires_confirmation") {
+                // We collected an account - possibly instantly verified, but possibly
+                // manually-entered. Display payment method details and mandate text
+                // to the customer and confirm the intent once they accept
+                // the mandate.
+                await setupIntentFn();
+                confirmPaymentIntentFn(confirmationForm);
+                confirmationForm.style.display = "block";
+              }
+            });
+        });
+      };
+      setTimeout(() => {}, 5000);
+      let setupIntentFn = async () => {
+        const customer = document.getElementById("customer").value;
+        const response = await fetch(`/ACH/createSetupIntents/${customer}`);
+        const { setupIntent } = await response.json();
+        setupIntentClientSecret = setupIntent.client_secret;
+        console.log("setupIntent==>", setupIntent);
+      };
+      document
+        .getElementById("getClientSecret")
+        .addEventListener("click", () => {
+          getClientSecret();
+        });
+    </script>
+  </body>
+</html>

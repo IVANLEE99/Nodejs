@@ -8,17 +8,13 @@ router.get("/ACH/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
 // affirm
-router.get("/ACH/secret", async (req, res) => {
-  const intent = await stripe.paymentIntents.create({
+router.get("/ACH/secret/:customer", async (req, res) => {
+  const intent = await await stripe.paymentIntents.create({
+    amount: 1099,
+    currency: "usd",
+    setup_future_usage: "off_session",
+    customer: req.params.customer,
     payment_method_types: ["us_bank_account"],
-    payment_method_data: {
-      type: "us_bank_account",
-    },
-    confirm: true,
-    amount: 5099,
-    currency: "eur",
-    return_url:
-      "http://localhost:3000/order/stripeAffirmPayReturnUrl?is_invalid_token=1",
   }); // ... Fetch or create the PaymentIntent
   res.json({ client_secret: intent.client_secret, intent });
 });
@@ -173,14 +169,23 @@ router.get("/ACH/payment_methods/:id", async function (req, res, next) {
   }
   // res.render("checkout2", { title: "Express", $publicKey });
 });
-router.post("/ACH/create-intent", async (req, res) => {
+router.post("/ACH/create-intent/:customer", async (req, res) => {
   const intent = await stripe.paymentIntents.create({
     // To allow saving and retrieving payment methods, provide the Customer ID.
-    customer: 'cus_SwX1z4RawKC9ZL',
+    customer: req.params.customer,
     amount: 1099,
     currency: "usd",
     payment_method_types: ["us_bank_account"],
   });
   res.json({ client_secret: intent.client_secret });
+});
+router.get("/ACH/createSetupIntents/:customer", async (req, res) => {
+  // 后端示例（Node.js）
+  const setupIntent = await stripe.setupIntents.create({
+    payment_method_types: ["us_bank_account"],
+    customer: req.params.customer, // 关联的客户ID
+  });
+  // 返回 setupIntent.client_secret 给前端
+  res.json({ setupIntent });
 });
 module.exports = router;
